@@ -1,0 +1,23 @@
+{
+  "name": "extrator-xml-nfe",
+  "version": "1.0.0",
+  "description": "Extrator de XML de NF-e a partir de arquivos PDF — Cleber Serviços Contábeis",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "vercel-dev": "vercel dev"
+  },
+  "engines": {
+    "node": ">=18.x"
+  },
+  "dependencies": {
+    "archiver": "^6.0.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^1.1.1",
+    "xml2js": "^0.6.2"
+  }
+}

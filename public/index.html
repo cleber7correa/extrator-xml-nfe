@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Extrator XML NF-e | Cleber Serviços Contábeis</title>
+  <meta name="description" content="Extraia XML de notas fiscais eletrônicas (NF-e) a partir de arquivos PDF. Suporta extração de XML embutido e parsing de DANFE." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 40 40" fill="none">
+            <rect width="40" height="40" rx="10" fill="url(#grad1)"/>
+            <path d="M10 12h13l7 7v9a2 2 0 01-2 2H10a2 2 0 01-2-2V14a2 2 0 012-2z" fill="white" fill-opacity="0.2" stroke="white" stroke-width="1.5"/>
+            <path d="M23 12v7h7" stroke="white" stroke-width="1.5" fill="none"/>
+            <path d="M14 22h12M14 26h8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="grad1" x1="0" y1="0" x2="40" y2="40">
+                <stop offset="0%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#8b5cf6"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div>
+          <span class="logo-title">Extrator XML NF-e</span>
+          <span class="logo-sub">Cleber Serviços Contábeis</span>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge badge-green" id="status-badge">
+          <span class="badge-dot"></span> Online
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Hero -->
+    <section class="hero">
+      <h1 class="hero-title">Extraia XMLs de <span class="gradient-text">NF-e</span> em segundos</h1>
+      <p class="hero-sub">Arraste seus PDFs de notas fiscais. O sistema extrai o XML embutido ou gera um XML estruturado automaticamente.</p>
+      <div class="hero-pills">
+        <span class="pill">✔ XML Embutido</span>
+        <span class="pill">✔ Parsing de DANFE</span>
+        <span class="pill">✔ Processamento em Lote</span>
+        <span class="pill">✔ Download ZIP</span>
+      </div>
+    </section>
+
+    <!-- Upload Zone -->
+    <section class="upload-section">
+      <div class="upload-zone" id="drop-zone">
+        <div class="upload-icon-wrapper">
+          <div class="upload-icon-bg"></div>
+          <svg class="upload-icon" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="28" fill="url(#u1)" fill-opacity="0.15"/>
+            <path d="M32 42V22M32 22l-8 8M32 22l8 8" stroke="url(#u1)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M18 46h28" stroke="url(#u1)" stroke-width="2.5" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="u1" x1="0" y1="0" x2="64" y2="64">
+                <stop stop-color="#6366f1"/>
+                <stop offset="1" stop-color="#a78bfa"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <p class="upload-title">Arraste PDFs aqui</p>
+        <p class="upload-sub">ou clique para selecionar arquivos</p>
+        <div class="upload-actions">
+          <button class="btn btn-primary" id="btn-select-files">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16"><path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/></svg>
+            Selecionar Arquivos
+          </button>
+          <button class="btn btn-outline" id="btn-select-folder">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>
+            Selecionar Pasta
+          </button>
+        </div>
+        <input type="file" id="file-input" accept=".pdf,application/pdf" multiple hidden />
+        <input type="file" id="folder-input" accept=".pdf,application/pdf" webkitdirectory multiple hidden />
+        <p class="upload-hint">Até 100 arquivos por vez · Máx. 50MB por arquivo · Apenas PDF</p>
+      </div>
+    </section>
+
+    <!-- Fila de Arquivos -->
+    <section class="queue-section" id="queue-section" style="display:none">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="18"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"/></svg>
+          Arquivos na Fila
+        </h2>
+        <div class="queue-actions">
+          <span class="queue-count" id="queue-count">0 arquivo(s)</span>
+          <button class="btn btn-danger-outline" id="btn-clear-queue">Limpar</button>
+          <button class="btn btn-primary" id="btn-processar">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
+            Processar Todos
+          </button>
+        </div>
+      </div>
+      <div class="file-list" id="file-list"></div>
+    </section>
+
+    <!-- Resultados -->
+    <section class="results-section" id="results-section" style="display:none">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="18"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>
+          Resultados
+        </h2>
+        <div class="queue-actions">
+          <span id="results-summary" class="results-summary"></span>
+          <button class="btn btn-success" id="btn-download-zip" style="display:none">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/></svg>
+            Baixar Todos (ZIP)
+          </button>
+        </div>
+      </div>
+
+      <!-- Estatísticas -->
+      <div class="stats-bar" id="stats-bar"></div>
+
+      <!-- Tabela de resultados -->
+      <div class="results-table-wrapper">
+        <table class="results-table" id="results-table">
+          <thead>
+            <tr>
+              <th>Arquivo</th>
+              <th>Status</th>
+              <th>Modo</th>
+              <th>Chave NF-e</th>
+              <th>Número</th>
+              <th>Valor Total</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Modal Visualizador XML -->
+    <div class="modal-overlay" id="xml-modal" style="display:none">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modal-title">Visualizar XML</h3>
+          <div class="modal-actions">
+            <button class="btn btn-outline btn-sm" id="btn-copy-xml">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="14"><path d="M8 2a1 1 0 000 2h2a1 1 0 100-2H8z"/><path d="M3 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"/></svg>
+              Copiar
+            </button>
+            <button class="btn btn-primary btn-sm" id="btn-download-xml">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="14"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/></svg>
+              Download
+            </button>
+            <button class="modal-close" id="btn-close-modal">✕</button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <pre class="xml-viewer" id="xml-content"></pre>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 Cleber Serviços Contábeis · Extrator XML NF-e v1.0</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
