@@ -201,13 +201,25 @@ async function processarPDF(filePath, originalName) {
   try {
     const xmlEmbutido = await extrairXMLEmbutido(buffer);
     if (xmlEmbutido && xmlEmbutido.trim().length > 50) {
+      const dados = parsearDadosXML(xmlEmbutido);
+      if (xmlEmbutido.includes('<DadosNFe')) {
+        const xmlCorreto = gerarXML(dados, originalName);
+        return {
+          arquivo: originalName,
+          status: 'sucesso',
+          modo: 'texto_parseado',
+          mensagem: 'XML antigo embutido convertido para o novo padrão SEFAZ.',
+          xml: xmlCorreto,
+          dados
+        };
+      }
       return {
         arquivo: originalName,
         status: 'sucesso',
         modo: 'xml_embutido',
         mensagem: 'XML extraído diretamente do anexo do PDF.',
         xml: xmlEmbutido,
-        dados: parsearDadosXML(xmlEmbutido)
+        dados
       };
     }
   } catch (e) {
@@ -327,14 +339,36 @@ function parsearDadosXML(xmlStr) {
     return '';
   };
   return {
-    chaveAcesso: get('chNFe') || extrairChaveDe44Digitos(xmlStr),
-    numero: getFirst('nNF', 'numero'),
-    serie: get('serie'),
-    dataEmissao: getFirst('dhEmi', 'dEmi'),
-    emitente: { cnpj: get('CNPJ'), razaoSocial: get('xNome'), uf: get('UF') },
-    destinatario: { cnpj: get('CNPJ'), razaoSocial: get('xNome') },
-    valorTotal: getFirst('vNF', 'vTotTrib'),
-    naturezaOperacao: get('natOp')
+    chaveAcesso: get('chNFe') || get('ChaveAcesso') || extrairChaveDe44Digitos(xmlStr),
+    numero: getFirst('nNF', 'numero', 'Numero'),
+    serie: getFirst('serie', 'Serie'),
+    dataEmissao: getFirst('dhEmi', 'dEmi', 'DataEmissao'),
+    emitente: { 
+      cnpj: getFirst('CNPJ', 'Cnpj'), 
+      razaoSocial: getFirst('xNome', 'RazaoSocial'), 
+      uf: getFirst('UF', 'Uf'),
+      endereco: getFirst('xLgr', 'Endereco'),
+      municipio: getFirst('xMun', 'Municipio'),
+      cep: getFirst('CEP', 'Cep')
+    },
+    destinatario: { 
+      cnpj: getFirst('CNPJ', 'Cnpj'), 
+      cpf: getFirst('CPF', 'Cpf'),
+      razaoSocial: getFirst('xNome', 'RazaoSocial'),
+      endereco: getFirst('xLgr', 'Endereco'),
+      municipio: getFirst('xMun', 'Municipio'),
+      uf: getFirst('UF', 'Uf'),
+      cep: getFirst('CEP', 'Cep')
+    },
+    valorTotal: getFirst('vNF', 'vTotTrib', 'ValorTotal'),
+    valorProdutos: getFirst('vProd', 'ValorProdutos'),
+    valorFrete: getFirst('vFrete', 'ValorFrete'),
+    valorSeguro: getFirst('vSeg', 'ValorSeguro'),
+    valorDesconto: getFirst('vDesc', 'ValorDesconto'),
+    valorIPI: getFirst('vIPI', 'ValorIPI'),
+    valorICMS: getFirst('vICMS', 'BaseCalculoICMS'),
+    naturezaOperacao: getFirst('natOp', 'NaturezaOperacao'),
+    informacoesComplementares: getFirst('infCpl', 'InformacoesComplementares')
   };
 }
 
