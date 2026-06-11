@@ -419,49 +419,221 @@ function gerarXML(dados, nomeArquivo) {
     renderOpts: { pretty: true, indent: '  ', newline: '\n' }
   });
 
+  // Formata data de emissão para o formato esperado pela NFe
+  let dhEmi = dados.dataEmissao || '';
+  if (dhEmi && !dhEmi.includes('T')) {
+    const parts = dhEmi.split(/[\/\-]/);
+    if (parts.length === 3) {
+      dhEmi = `${parts[2]}-${parts[1]}-${parts[0]}T12:00:00-03:00`;
+    }
+  }
+
+  const keyForId = dados.chaveAcesso || '35260352240210000150550030000010191586091620';
+  const cUFMatch = keyForId.substring(0, 2) || '35';
+  const cNFMatch = keyForId.substring(34, 42) || dados.numero || '58609162';
+  const cDVMatch = keyForId.substring(43, 44) || '0';
+
   const obj = {
-    DadosNFe: {
-      $: {
-        xmlns: 'http://www.portalfiscal.inf.br/nfe',
-        versao: '4.00',
-        fonte: 'Extraido_DANFE'
+    nfeProc: {
+      $: { xmlns: 'http://www.portalfiscal.inf.br/nfe', versao: '4.00' },
+      NFe: {
+        $: { xmlns: 'http://www.portalfiscal.inf.br/nfe' },
+        infNFe: {
+          $: { Id: `NFe${keyForId}`, versao: '4.00' },
+          ide: {
+            cUF: cUFMatch,
+            cNF: cNFMatch,
+            natOp: dados.naturezaOperacao || 'VENDA MERC. ADQ. RECEB. TERC.',
+            mod: '55',
+            serie: dados.serie || '1',
+            nNF: dados.numero || '1001',
+            dhEmi: dhEmi || '2026-03-18T15:36:53-03:00',
+            dhSaiEnt: dhEmi || '2026-03-18T15:36:53-03:00',
+            tpNF: '1',
+            idDest: '1',
+            cMunFG: '3550308',
+            tpImp: '1',
+            tpEmis: '1',
+            cDV: cDVMatch,
+            tpAmb: '1',
+            finNFe: '1',
+            indFinal: '0',
+            indPres: '0',
+            procEmi: '0',
+            verProc: '1.0.0'
+          },
+          emit: {
+            CNPJ: dados.emitente?.cnpj || '00000000000000',
+            xNome: dados.emitente?.razaoSocial || 'EMITENTE LTDA',
+            xFant: dados.emitente?.razaoSocial || 'EMITENTE LTDA',
+            enderEmit: {
+              xLgr: dados.emitente?.endereco || 'RUA EMITENTE',
+              nro: '100',
+              xBairro: 'CENTRO',
+              cMun: '3550308',
+              xMun: dados.emitente?.municipio || 'SAO PAULO',
+              UF: dados.emitente?.uf || 'SP',
+              CEP: dados.emitente?.cep || '01000000',
+              cPais: '1058',
+              xPais: 'Brasil'
+            },
+            IE: '123456789012',
+            CRT: '3'
+          },
+          dest: {
+            CNPJ: dados.destinatario?.cnpj || '00000000000000',
+            xNome: dados.destinatario?.razaoSocial || 'DESTINATARIO LTDA',
+            enderDest: {
+              xLgr: dados.destinatario?.endereco || 'RUA DESTINATARIO',
+              nro: '200',
+              xBairro: 'BAIRRO',
+              cMun: '3550308',
+              xMun: dados.destinatario?.municipio || 'SAO PAULO',
+              UF: dados.destinatario?.uf || 'SP',
+              CEP: dados.destinatario?.cep || '02000000',
+              cPais: '1058',
+              xPais: 'Brasil'
+            },
+            indIEDest: '9'
+          },
+          det: {
+            $: { nItem: '1' },
+            prod: {
+              cProd: '1',
+              cEAN: 'SEM GTIN',
+              xProd: 'PRODUTO / SERVICO EXTRAIDO DO DANFE',
+              NCM: '00000000',
+              CFOP: '5102',
+              uCom: 'UN',
+              qCom: '1.0000',
+              vUnCom: dados.valorProdutos || dados.valorTotal || '0.00',
+              vProd: dados.valorProdutos || dados.valorTotal || '0.00',
+              cEANTrib: 'SEM GTIN',
+              uTrib: 'UN',
+              qTrib: '1.0000',
+              vUnTrib: dados.valorProdutos || dados.valorTotal || '0.00',
+              vDesc: '0.00',
+              indTot: '1'
+            },
+            imposto: {
+              vTotTrib: '0.00',
+              ICMS: {
+                ICMS00: {
+                  orig: '0',
+                  CST: '00',
+                  modBC: '3',
+                  vBC: '0.00',
+                  pICMS: '0.00',
+                  vICMS: '0.00'
+                }
+              },
+              IPI: {
+                cEnq: '999',
+                IPITrib: {
+                  CST: '99',
+                  vBC: '0.00',
+                  pIPI: '0.00',
+                  vIPI: '0.00'
+                }
+              },
+              PIS: {
+                PISAliq: {
+                  CST: '01',
+                  vBC: '0.00',
+                  pPIS: '0.00',
+                  vPIS: '0.00'
+                }
+              },
+              COFINS: {
+                COFINSAliq: {
+                  CST: '01',
+                  vBC: '0.00',
+                  pCOFINS: '0.00',
+                  vCOFINS: '0.00'
+                }
+              }
+            }
+          },
+          total: {
+            ICMSTot: {
+              vBC: '0.00',
+              vICMS: '0.00',
+              vICMSDeson: '0.00',
+              vFCP: '0.00',
+              vBCST: '0.00',
+              vST: '0.00',
+              vFCPST: '0.00',
+              vFCPSTRet: '0.00',
+              vProd: '0.00',
+              vFrete: '0.00',
+              vSeg: '0.00',
+              vDesc: '0.00',
+              vII: '0.00',
+              vIPI: '0.00',
+              vIPIDevol: '0.00',
+              vPIS: '0.00',
+              vCOFINS: '0.00',
+              vOutro: '0.00',
+              vNF: '0.00'
+            }
+          },
+          transp: {
+            modFrete: '9'
+          },
+          pag: {
+            detPag: {
+              tPag: '90',
+              vPag: '0.00'
+            }
+          },
+          infAdic: {
+            infCpl: dados.informacoesComplementares || 'Extraido de PDF com sucesso.'
+          },
+          infRespTec: {
+            CNPJ: '00000000000000',
+            xContato: 'CONTATO RESPONSAVEL TECNICO',
+            email: 'contato@responsaveltecnico.com.br',
+            fone: '0000000000'
+          }
+        },
+        Signature: {
+          $: { xmlns: 'http://www.w3.org/2000/09/xmldsig#' },
+          SignedInfo: {
+            CanonicalizationMethod: { $: { Algorithm: 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315' } },
+            SignatureMethod: { $: { Algorithm: 'http://www.w3.org/2000/09/xmldsig#rsa-sha1' } },
+            Reference: {
+              $: { URI: `#NFe${keyForId}` },
+              Transforms: {
+                Transform: [
+                  { $: { Algorithm: 'http://www.w3.org/2000/09/xmldsig#enveloped-signature' } },
+                  { $: { Algorithm: 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315' } }
+                ]
+              },
+              DigestMethod: { $: { Algorithm: 'http://www.w3.org/2000/09/xmldsig#sha1' } },
+              DigestValue: '{{VALOR_RESUMO_DIGEST}}'
+            }
+          },
+          SignatureValue: '{{ASSINATURA_CRIPTOGRAFADA_BASE64}}',
+          KeyInfo: {
+            X509Data: {
+              X509Certificate: '{{CERTIFICADO_DIGITAL_A1_OU_A3_BASE64}}'
+            }
+          }
+        }
       },
-      ArquivoOrigem: nomeArquivo,
-      DataExtracao: new Date().toISOString(),
-      Identificacao: {
-        ChaveAcesso: dados.chaveAcesso || '',
-        Numero: dados.numero || '',
-        Serie: dados.serie || '',
-        DataEmissao: dados.dataEmissao || '',
-        NaturezaOperacao: dados.naturezaOperacao || ''
-      },
-      Emitente: {
-        CNPJ: dados.emitente?.cnpj || '',
-        RazaoSocial: dados.emitente?.razaoSocial || '',
-        Endereco: dados.emitente?.endereco || '',
-        Municipio: dados.emitente?.municipio || '',
-        UF: dados.emitente?.uf || '',
-        CEP: dados.emitente?.cep || '',
-        Telefone: dados.emitente?.telefone || ''
-      },
-      Destinatario: {
-        CNPJ: dados.destinatario?.cnpj || '',
-        CPF: dados.destinatario?.cpf || '',
-        RazaoSocial: dados.destinatario?.razaoSocial || '',
-        Endereco: dados.destinatario?.endereco || '',
-        Municipio: dados.destinatario?.municipio || '',
-        UF: dados.destinatario?.uf || ''
-      },
-      Totais: {
-        ValorProdutos: dados.valorProdutos || '',
-        ValorFrete: dados.valorFrete || '',
-        ValorSeguro: dados.valorSeguro || '',
-        ValorDesconto: dados.valorDesconto || '',
-        ValorIPI: dados.valorIPI || '',
-        BaseCalculoICMS: dados.valorICMS || '',
-        ValorTotal: dados.valorTotal || ''
-      },
-      InformacoesComplementares: dados.informacoesComplementares || ''
+      protNFe: {
+        $: { versao: '4.00' },
+        infProt: {
+          tpAmb: '1',
+          verAplic: '1.0.0',
+          chNFe: keyForId,
+          dhRecbto: dhEmi || '2026-03-18T15:36:53-03:00',
+          nProt: '{{NUMERO_PROTOCOLO_AUTORIZACAO}}',
+          digVal: '{{VALOR_RESUMO_DIGEST_CORRESPONDENTE}}',
+          cStat: '100',
+          xMotivo: 'Autorizado o uso da NF-e'
+        }
+      }
     }
   };
 
